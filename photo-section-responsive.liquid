@@ -1,0 +1,277 @@
+{% doc %}
+  @prompt
+    Generate A Responsive Photo Section Optimized for Mobile and Desktop with Adaptive Sizing
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-photo-section-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .ai-photo-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-photo-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: {{ block.settings.mobile_aspect_ratio }}%;
+    background-color: #f4f4f4;
+  }
+
+  .ai-photo-image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-photo-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+  }
+
+  .ai-photo-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .ai-photo-empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  /* Mobile Styles - Default */
+  @media screen and (max-width: 749px) {
+    .ai-photo-section-{{ ai_gen_id }} {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .ai-photo-wrapper-{{ ai_gen_id }} {
+      padding-bottom: {{ block.settings.mobile_aspect_ratio }}%;
+    }
+  }
+
+  /* Tablet Styles */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .ai-photo-section-{{ ai_gen_id }} {
+      width: {{ block.settings.tablet_width_percent }}%;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .ai-photo-wrapper-{{ ai_gen_id }} {
+      padding-bottom: {{ block.settings.tablet_aspect_ratio }}%;
+    }
+  }
+
+  /* Desktop Styles */
+  @media screen and (min-width: 990px) {
+    .ai-photo-section-{{ ai_gen_id }} {
+      width: {{ block.settings.desktop_width_percent }}%;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .ai-photo-wrapper-{{ ai_gen_id }} {
+      padding-bottom: {{ block.settings.desktop_aspect_ratio }}%;
+    }
+  }
+{% endstyle %}
+
+<photo-section-{{ ai_gen_id }}
+  class="ai-photo-section-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-photo-container-{{ ai_gen_id }}">
+    <div class="ai-photo-wrapper-{{ ai_gen_id }}">
+      {% if block.settings.image %}
+        <img
+          src="{{ block.settings.image | image_url: width: 1200 }}"
+          alt="{{ block.settings.image.alt | escape }}"
+          loading="lazy"
+          width="{{ block.settings.image.width }}"
+          height="{{ block.settings.image.height }}"
+          class="ai-photo-image-{{ ai_gen_id }}"
+        >
+      {% else %}
+        <div class="ai-photo-placeholder-{{ ai_gen_id }}">
+          {{ 'image' | placeholder_svg_tag }}
+          <div class="ai-photo-empty-state-{{ ai_gen_id }}">
+            Add an image to get started
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</photo-section-{{ ai_gen_id }}>
+
+{% schema %}
+{
+  "name": "Photo Section - Responsive",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings (0px - 749px)"
+    },
+    {
+      "type": "select",
+      "id": "mobile_aspect_ratio",
+      "label": "Mobile aspect ratio",
+      "options": [
+        {
+          "value": "100",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "125",
+          "label": "Portrait (4:5)"
+        },
+        {
+          "value": "66.67",
+          "label": "Landscape (3:2)"
+        },
+        {
+          "value": "75",
+          "label": "Standard (4:3)"
+        },
+        {
+          "value": "56.25",
+          "label": "Wide (16:9)"
+        }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "header",
+      "content": "Tablet Settings (750px - 989px)"
+    },
+    {
+      "type": "select",
+      "id": "tablet_aspect_ratio",
+      "label": "Tablet aspect ratio",
+      "options": [
+        {
+          "value": "66.67",
+          "label": "Landscape (3:2)"
+        },
+        {
+          "value": "75",
+          "label": "Standard (4:3)"
+        },
+        {
+          "value": "100",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "56.25",
+          "label": "Wide (16:9)"
+        }
+      ],
+      "default": "66.67"
+    },
+    {
+      "type": "range",
+      "id": "tablet_width_percent",
+      "label": "Tablet width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Desktop Settings (990px+)"
+    },
+    {
+      "type": "select",
+      "id": "desktop_aspect_ratio",
+      "label": "Desktop aspect ratio",
+      "options": [
+        {
+          "value": "56.25",
+          "label": "Wide (16:9)"
+        },
+        {
+          "value": "66.67",
+          "label": "Cinema (3:2)"
+        },
+        {
+          "value": "75",
+          "label": "Standard (4:3)"
+        },
+        {
+          "value": "50",
+          "label": "Extra Wide (2:1)"
+        }
+      ],
+      "default": "56.25"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 90
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Photo Section - Responsive"
+    }
+  ]
+}
+{% endschema %}
