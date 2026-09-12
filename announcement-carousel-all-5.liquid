@@ -1,0 +1,277 @@
+{{ 'component-slideshow.css' | asset_url | stylesheet_tag }}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign social_icons = true
+  if settings.social_facebook_link == blank and settings.social_instagram_link == blank and settings.social_youtube_link == blank and settings.social_tiktok_link == blank and settings.social_twitter_link == blank and settings.social_pinterest_link == blank and settings.social_snapchat_link == blank and settings.social_tumblr_link == blank and settings.social_vimeo_link == blank
+    assign social_icons = false
+  endif
+  if section.settings.enable_country_selector or section.settings.enable_language_selector
+    assign language_country_selector = true
+  endif
+  if section.blocks.size > 0
+    assign announcement_bar = true
+  endif
+-%}
+
+{% if social_icons %}
+  {{ 'component-list-social.css' | asset_url | stylesheet_tag }}
+{% endif %}
+
+<style>
+  /* Announcement Bar Container */
+  .announcement-bar__container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Announcement Items Wrapper */
+  .announcement-items-wrapper {
+    display: flex;
+    gap: 2rem;
+    padding: 0;
+    animation: slide-left 3s ease-in-out infinite;
+  }
+
+  /* Individual Announcement Item */
+  .announcement-item {
+    flex-shrink: 0;
+    min-width: 100%;
+    text-align: center;
+    padding: 12px 20px;
+  }
+
+  .announcement-item p {
+    margin: 0;
+  }
+
+  /* Slide animation - moves left by 20% (100% / 5 items) */
+  @keyframes slide-left {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-20%);
+    }
+    45% {
+      transform: translateX(-20%);
+    }
+    50% {
+      transform: translateX(-40%);
+    }
+    70% {
+      transform: translateX(-40%);
+    }
+    75% {
+      transform: translateX(-60%);
+    }
+    95% {
+      transform: translateX(-60%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  /* Pause animation on hover */
+  .announcement-bar__container:hover .announcement-items-wrapper {
+    animation-play-state: paused;
+  }
+
+  .announcement-bar__message {
+    margin: 0;
+    font-size: inherit;
+  }
+
+  .announcement-bar__link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .announcement-bar__link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div
+  class="utility-bar color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator and section.blocks.size > 0 %} utility-bar--bottom-border{% elsif section.settings.show_line_separator and section.settings.show_social and social_icons%} utility-bar--bottom-border-social-only{% endif %}{% if section.settings.enable_country_selector or section.settings.enable_language_selector %} header-localization{% endif %}"
+>
+  <div class="page-width utility-bar__grid{% if announcement_bar and language_country_selector or section.settings.show_social and social_icons %} utility-bar__grid--3-col{% elsif language_country_selector or section.settings.show_social and social_icons %} utility-bar__grid--2-col{% endif %}">
+    {%- if section.settings.show_social and social_icons -%}
+      {%- render 'social-icons' -%}
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="announcement-bar__container" role="region" aria-label="{{ 'sections.header.announcement' | t }}">
+        <div class="announcement-items-wrapper">
+          {%- for block in section.blocks -%}
+            <div class="announcement-item h5" {{ block.shopify_attributes }}>
+              {%- if block.settings.text != blank -%}
+                {%- if block.settings.link != blank -%}
+                  <a href="{{ block.settings.link }}" class="announcement-bar__link">
+                {%- endif -%}
+                <p class="announcement-bar__message">
+                  {{ block.settings.text | escape }}
+                </p>
+                {%- if block.settings.link != blank -%}
+                  </a>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="localization-wrapper">
+      {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
+        <localization-form class="small-hide medium-hide">
+          {%- form 'localization', id: 'AnnouncementCountryForm', class: 'localization-form' -%}
+            <div>
+              <h2 class="visually-hidden" id="AnnouncementCountryLabel">{{ 'localization.country_label' | t }}</h2>
+              {%- render 'country-localization', localPosition: 'AnnouncementCountry' -%}
+            </div>
+          {%- endform -%}
+        </localization-form>
+      {% endif %}
+
+      {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+        <localization-form class="small-hide medium-hide">
+          {%- form 'localization', id: 'AnnouncementLanguageForm', class: 'localization-form' -%}
+            <div>
+              <h2 class="visually-hidden" id="AnnouncementLanguageLabel">{{ 'localization.language_label' | t }}</h2>
+              {%- render 'language-localization', localPosition: 'AnnouncementLanguage' -%}
+            </div>
+          {%- endform -%}
+        </localization-form>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Announcement Carousel",
+  "max_blocks": 12,
+  "class": "announcement-bar-section",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "change_slides_speed",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Animation speed between announcements",
+      "default": 3
+    },    
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-4"
+    },  
+    {
+      "type": "checkbox",
+      "id": "show_line_separator",
+      "default": true,
+      "label": "t:sections.header.settings.show_line_separator.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.announcement-bar.settings.heading_utilities.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.announcement-bar.settings.paragraph.content"
+    },             
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "default": false,
+      "label": "t:sections.announcement-bar.settings.show_social.label",
+      "info": "t:sections.announcement-bar.settings.show_social.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_country_selector",
+      "default": false,
+      "label": "t:sections.announcement-bar.settings.enable_country_selector.label",
+      "info": "t:sections.announcement-bar.settings.enable_country_selector.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_language_selector",
+      "default": false,
+      "label": "t:sections.announcement-bar.settings.enable_language_selector.label",
+      "info": "t:sections.announcement-bar.settings.enable_language_selector.info"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "t:sections.announcement-bar.blocks.announcement.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "default": "Welcome to our store",
+          "label": "t:sections.announcement-bar.blocks.announcement.settings.text.label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "t:sections.announcement-bar.blocks.announcement.settings.link.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.announcement-bar.presets.name",
+      "blocks": [
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "✨ Welcome to our store!"
+          }
+        },
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "🚚 Free shipping on orders over $50"
+          }
+        },
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "🔥 Limited time sale - 30% off!"
+          }
+        },
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "🆕 New arrivals every Friday"
+          }
+        },
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "💬 Questions? Chat with us anytime"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
